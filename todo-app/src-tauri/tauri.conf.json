@@ -13,8 +13,12 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "dialog": {
-        "message": true
+      "path": {
+        "all": true
+      },
+      "fs": {
+        "scope": ["$APPLOCALDATA/*"],
+        "writeFile": true
       }
     },
     "bundle": {

@@ -1,10 +1,16 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import {message} from "@tauri-apps/api/dialog";
+import {BaseDirectory, writeTextFile} from "@tauri-apps/api/fs";
+import {appConfigDir, appDataDir, appLocalDataDir} from "@tauri-apps/api/path";
 
 export default defineComponent({
   mounted() {
-    message("Hello. Please click ok to continue", "Welcome Message").then(() => console.log("Hi"))
+    appDataDir().then(path => console.log(path))
+    appConfigDir().then(path => console.log(path))
+    appLocalDataDir().then(path => console.log(path))
+
+    writeTextFile({path: 'app.todo', contents: '1. make this app\n2. use this app'}, {dir: BaseDirectory.AppLocalData})
   }
 })
 
@@ -21,5 +27,5 @@ export default defineComponent({
 </template>
 
 <style scoped>
- 
+
 </style>
