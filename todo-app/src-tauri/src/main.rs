@@ -3,8 +3,13 @@
   windows_subsystem = "windows"
 )]
 
+mod database;
+
 fn main() {
-  tauri::Builder::default()
+  database::create_database().expect("TODO: panic message");
+  
+  /*tauri::Builder::default()
     .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .expect("error while running tauri application");*/
 }
+
