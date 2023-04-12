@@ -8,7 +8,7 @@ pub fn create_database()  -> Result<()>{
     conn.execute(
         "CREATE TABLE IF NOT EXISTS todo(
             id integer primary key
-            
+
         )",
         (),
     )?;
