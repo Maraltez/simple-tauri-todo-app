@@ -1,7 +1,9 @@
+BEGIN;
 DROP TABLE IF EXISTS todo_category;
 DROP TABLE IF EXISTS todo_item;
 DROP Table IF EXISTS todo;
 DROP TABLE IF EXISTS category;
+DROP TRIGGER IF EXISTS tr_todo_update;
 DROP TRIGGER IF EXISTS tr_todo_item_insert;
 DROP TRIGGER IF EXISTS tr_todo_item_update_raise;
 DROP TRIGGER IF EXISTS tr_todo_item_update;
@@ -29,8 +31,8 @@ CREATE TABLE IF NOT EXISTS todo_category(
     todo_id integer,
     category_id integer,
     PRIMARY KEY(todo_id, category_id),
-    FOREIGN KEY(todo_id) references todo(todo_id) on delete cascade,
-    FOREIGN KEY(category_id) references category(category_id) on delete cascade
+    FOREIGN KEY(todo_id) references todo(todo_id) on update cascade on delete cascade,
+    FOREIGN KEY(category_id) references category(category_id) on update cascade on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS todo_item(
@@ -42,8 +44,13 @@ CREATE TABLE IF NOT EXISTS todo_item(
     edit_date text default CURRENT_TIMESTAMP not null,
     completed integer default 0 not null,
     unique (item_id, todo_id),
-    foreign key (todo_id) references todo(todo_id) on delete cascade
+    foreign key (todo_id) references todo(todo_id) on update cascade on delete cascade
 );
+
+CREATE TRIGGER IF NOT EXISTS tr_todo_update AFTER UPDATE ON todo WHEN new.edit_date IS NULL
+    BEGIN
+        UPDATE todo SET edit_date = CURRENT_TIMESTAMP WHERE todo.todo_id = new.todo_id;
+    END;
 
 CREATE TRIGGER IF NOT EXISTS tr_todo_item_insert BEFORE INSERT ON todo_item
     BEGIN
@@ -107,7 +114,11 @@ CREATE TRIGGER IF NOT EXISTS tr_todo_item_delete AFTER DELETE on todo_item
         );
     END;
 
+COMMIT;
+
 /*
+Queries to test database
+
 INSERT INTO todo(name, priority)
 VALUES ('test1', 0),
        ('test2', 0),

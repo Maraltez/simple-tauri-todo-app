@@ -1,37 +1,38 @@
+use std::fs::File;
+use std::io::Read;
+use std::path::{Path, PathBuf};
 use rusqlite::{Connection, Result};
+use tauri::api::path::{BaseDirectory, resolve_path};
+use tauri::{Assets, Context, Env};
 
-pub fn create_database()  -> Result<()>{
-    let conn = Connection::open("test.db")?;
+pub fn get_database(path: &Path) -> Result<()>{
 
-    conn.execute("DROP TABLE IF EXISTS todo",())?;
+    let path_exists = Path::new(&path).exists();
 
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS todo(
-            id integer primary key
+    let conn = Connection::open(&path)?;
 
-        )",
-        (),
-    )?;
-
-    /*conn.execute(
-        "INSERT INTO todo (id) VALUES (3)",
-        ()
-    )?;*/
-
-    println!("{dir}/database.db",dir=tauri::api::path::BaseDirectory::AppData.variable());
+    if !path_exists{
+        create_database(&conn).expect("TODO: panic message");
+    }
 
     Ok(())
 }
 
-fn create_tables(conn: &Connection) -> Result<()>{
-    conn.execute_batch(
-        "BEGIN;
-        CREATE TABLE IF NOT EXISTS todo
-        "
-    )
+fn create_database(conn: &Connection) -> Result<()>{
+    let mut file = File::open("./src/database/db_creation.sql").expect("File not found");
+    let mut data = String::from("");
 
+    file.read_to_string(&mut data).expect("Test");
+
+    println!("{}", data);
+
+    conn.execute_batch(&*data)?;
+
+    Ok(())
 
 }
+
+
 
 
 
