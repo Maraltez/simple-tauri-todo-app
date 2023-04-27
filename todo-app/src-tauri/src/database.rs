@@ -1,18 +1,26 @@
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use lazy_static::lazy_static;
 use rusqlite::{Connection, Result};
 use tauri::api::path::{BaseDirectory, resolve_path};
 use tauri::{Assets, Context, Env};
+
+lazy_static! {
+    static ref DB_CONNECTION: Mutex<Option<Connection>> = Mutex::new(None);
+}
 
 pub fn get_database(path: &Path) -> Result<()>{
 
     let path_exists = Path::new(&path).exists();
 
-    let conn = Connection::open(&path)?;
+    let mut conn = DB_CONNECTION.lock().unwrap();
+
+    *conn = Some(Connection::open(&path)?);
 
     if !path_exists{
-        create_database(&conn).expect("TODO: panic message");
+        create_database(conn.as_ref().unwrap()).expect("TODO: panic message");
     }
 
     Ok(())
@@ -29,8 +37,9 @@ fn create_database(conn: &Connection) -> Result<()>{
     conn.execute_batch(&*data)?;
 
     Ok(())
-
 }
+
+//fn add_user()
 
 
 
